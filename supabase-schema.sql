@@ -1,27 +1,36 @@
--- Enable PostGIS extension (for geolocation features)
-CREATE EXTENSION IF NOT EXISTS postgis;
+-- Drop existing reminders table to rebuild with new schema
+DROP TABLE IF EXISTS public.reminders;
 
--- Create reminders table
-CREATE TABLE IF NOT EXISTS public.reminders (
+-- Create reminders table with new schema
+CREATE TABLE public.reminders (
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-    title TEXT NOT NULL,
-    description TEXT,
-    reminder_date TIMESTAMPTZ NOT NULL,
-    location TEXT,
-    location_point GEOGRAPHY(POINT, 4326), -- PostGIS geography column for lat/lng
+    reminder_type TEXT NOT NULL CHECK (reminder_type IN (
+        'Vehicle insurance',
+        'Vehicle Pollution',
+        'Vehicle Registration',
+        'Vehicle service',
+        'Passport',
+        'Vaccination',
+        'Land Tax',
+        'Property Tax'
+    )),
+    document_name TEXT NOT NULL,
+    document_description TEXT,
+    expiry_date DATE NOT NULL,
+    reminder_date DATE NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Create index on user_id for faster queries
-CREATE INDEX IF NOT EXISTS idx_reminders_user_id ON public.reminders(user_id);
+CREATE INDEX idx_reminders_user_id ON public.reminders(user_id);
 
 -- Create index on reminder_date for sorting
-CREATE INDEX IF NOT EXISTS idx_reminders_date ON public.reminders(reminder_date);
+CREATE INDEX idx_reminders_reminder_date ON public.reminders(reminder_date);
 
--- Create spatial index for location-based queries
-CREATE INDEX IF NOT EXISTS idx_reminders_location ON public.reminders USING GIST(location_point);
+-- Create index on expiry_date for sorting
+CREATE INDEX idx_reminders_expiry_date ON public.reminders(expiry_date);
 
 -- Enable Row Level Security
 ALTER TABLE public.reminders ENABLE ROW LEVEL SECURITY;

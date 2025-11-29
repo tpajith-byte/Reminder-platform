@@ -4,14 +4,15 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useRouter } from 'next/navigation'
 import { User } from '@supabase/supabase-js'
-import { Bell, Plus, MapPin, Calendar, Trash2, LogOut } from 'lucide-react'
+import { Bell, Plus, Calendar, Trash2, LogOut, FileText } from 'lucide-react'
 
 interface Reminder {
     id: string
-    title: string
-    description: string
+    reminder_type: string
+    document_name: string
+    document_description?: string
+    expiry_date: string
     reminder_date: string
-    location?: string
     created_at: string
 }
 
@@ -20,11 +21,24 @@ export default function DashboardClient({ user }: { user: User }) {
     const [loading, setLoading] = useState(true)
     const [showForm, setShowForm] = useState(false)
     const [formData, setFormData] = useState({
-        title: '',
-        description: '',
+        reminder_type: '',
+        document_name: '',
+        document_description: '',
+        expiry_date: '',
         reminder_date: '',
-        location: '',
     })
+
+    const reminderTypes = [
+        'Vehicle insurance',
+        'Vehicle Pollution',
+        'Vehicle Registration',
+        'Vehicle service',
+        'Passport',
+        'Vaccination',
+        'Land Tax',
+        'Property Tax'
+    ]
+
     const router = useRouter()
     const supabase = createClient()
 
@@ -61,7 +75,7 @@ export default function DashboardClient({ user }: { user: User }) {
 
             if (error) throw error
 
-            setFormData({ title: '', description: '', reminder_date: '', location: '' })
+            setFormData({ reminder_type: '', document_name: '', document_description: '', expiry_date: '', reminder_date: '' })
             setShowForm(false)
             fetchReminders()
         } catch (err) {
@@ -130,45 +144,59 @@ export default function DashboardClient({ user }: { user: User }) {
                         <h3 className="text-xl font-semibold text-white mb-4">Create New Reminder</h3>
                         <form onSubmit={handleSubmit} className="space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-gray-200 mb-2">Title</label>
+                                <label className="block text-sm font-medium text-gray-200 mb-2">Reminder Type</label>
+                                <select
+                                    value={formData.reminder_type}
+                                    onChange={(e) => setFormData({ ...formData, reminder_type: e.target.value })}
+                                    required
+                                    className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                >
+                                    <option value="" disabled>Select a type...</option>
+                                    {reminderTypes.map(type => (
+                                        <option key={type} value={type} className="bg-slate-800">{type}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-200 mb-2">Document Name</label>
                                 <input
                                     type="text"
-                                    value={formData.title}
-                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                    value={formData.document_name}
+                                    onChange={(e) => setFormData({ ...formData, document_name: e.target.value })}
                                     required
                                     className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                    placeholder="Meeting with team"
+                                    placeholder="e.g., Car Insurance - Honda Accord"
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-200 mb-2">Description</label>
+                                <label className="block text-sm font-medium text-gray-200 mb-2">Document Description</label>
                                 <textarea
-                                    value={formData.description}
-                                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                                    value={formData.document_description}
+                                    onChange={(e) => setFormData({ ...formData, document_description: e.target.value })}
                                     rows={3}
                                     className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                    placeholder="Discuss project timeline..."
+                                    placeholder="Additional details..."
                                 />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-200 mb-2">Date & Time</label>
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">Expiry Date</label>
                                     <input
-                                        type="datetime-local"
-                                        value={formData.reminder_date}
-                                        onChange={(e) => setFormData({ ...formData, reminder_date: e.target.value })}
+                                        type="date"
+                                        value={formData.expiry_date}
+                                        onChange={(e) => setFormData({ ...formData, expiry_date: e.target.value })}
                                         required
                                         className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-200 mb-2">Location (Optional)</label>
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">Reminder Date</label>
                                     <input
-                                        type="text"
-                                        value={formData.location}
-                                        onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
-                                        placeholder="Office, Home..."
+                                        type="date"
+                                        value={formData.reminder_date}
+                                        onChange={(e) => setFormData({ ...formData, reminder_date: e.target.value })}
+                                        required
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                                     />
                                 </div>
                             </div>
@@ -211,7 +239,10 @@ export default function DashboardClient({ user }: { user: User }) {
                                 className="p-6 bg-white/10 backdrop-blur-lg rounded-2xl border border-white/20 hover:bg-white/15 transition group"
                             >
                                 <div className="flex items-start justify-between mb-3">
-                                    <h3 className="text-xl font-semibold text-white">{reminder.title}</h3>
+                                    <div className="flex items-center gap-2">
+                                        <FileText className="w-5 h-5 text-purple-400" />
+                                        <span className="text-xs font-semibold text-purple-300 uppercase">{reminder.reminder_type}</span>
+                                    </div>
                                     <button
                                         onClick={() => handleDelete(reminder.id)}
                                         className="opacity-0 group-hover:opacity-100 transition p-2 hover:bg-red-500/20 rounded-lg"
@@ -219,20 +250,19 @@ export default function DashboardClient({ user }: { user: User }) {
                                         <Trash2 className="w-4 h-4 text-red-400" />
                                     </button>
                                 </div>
-                                {reminder.description && (
-                                    <p className="text-gray-300 mb-4">{reminder.description}</p>
+                                <h3 className="text-xl font-semibold text-white mb-2">{reminder.document_name}</h3>
+                                {reminder.document_description && (
+                                    <p className="text-gray-300 mb-4 text-sm">{reminder.document_description}</p>
                                 )}
                                 <div className="space-y-2">
                                     <div className="flex items-center gap-2 text-sm text-gray-400">
                                         <Calendar className="w-4 h-4" />
-                                        {new Date(reminder.reminder_date).toLocaleString()}
+                                        <span>Expires: {new Date(reminder.expiry_date).toLocaleDateString()}</span>
                                     </div>
-                                    {reminder.location && (
-                                        <div className="flex items-center gap-2 text-sm text-gray-400">
-                                            <MapPin className="w-4 h-4" />
-                                            {reminder.location}
-                                        </div>
-                                    )}
+                                    <div className="flex items-center gap-2 text-sm text-yellow-300">
+                                        <Bell className="w-4 h-4" />
+                                        <span>Remind: {new Date(reminder.reminder_date).toLocaleDateString()}</span>
+                                    </div>
                                 </div>
                             </div>
                         ))}
