@@ -18,10 +18,12 @@
 3. Find and select your repository: **Reminder-platform**
 
 ### 3. Configure Build Settings
-Netlify should auto-detect Next.js, but verify these settings:
+Netlify should auto-detect Next.js. If asked, use these settings:
 - **Base directory**: `frontend`
 - **Build command**: `npm run build`
 - **Publish directory**: `.next`
+
+> **Note**: The `netlify.toml` file in the repository will automatically configure Netlify to use the Next.js Runtime plugin for proper server-side rendering support.
 
 ### 4. Add Environment Variables
 Before deploying, add your Supabase credentials:
