@@ -21,7 +21,7 @@
 Netlify should auto-detect Next.js, but verify these settings:
 - **Base directory**: `frontend`
 - **Build command**: `npm run build`
-- **Publish directory**: `frontend/.next`
+- **Publish directory**: `.next`
 
 ### 4. Add Environment Variables
 Before deploying, add your Supabase credentials:
