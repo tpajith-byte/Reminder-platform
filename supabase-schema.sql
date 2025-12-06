@@ -13,8 +13,10 @@ CREATE TABLE public.reminders (
         'Passport',
         'Vaccination',
         'Land Tax',
-        'Property Tax'
+        'Property Tax',
+        'Others'
     )),
+    other_reminder_type TEXT,
     document_name TEXT NOT NULL,
     document_description TEXT,
     expiry_date DATE NOT NULL,

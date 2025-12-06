@@ -10,12 +10,14 @@ export default function LoginPage() {
     const [password, setPassword] = useState('')
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
+    const [isEmailNotConfirmed, setIsEmailNotConfirmed] = useState(false)
     const router = useRouter()
     const supabase = createClient()
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault()
         setError(null)
+        setIsEmailNotConfirmed(false)
         setLoading(true)
 
         try {
@@ -24,12 +26,43 @@ export default function LoginPage() {
                 password,
             })
 
-            if (error) throw error
+            if (error) {
+                throw error
+            }
 
             router.push('/dashboard')
             router.refresh()
         } catch (err: any) {
             setError(err.message || 'Failed to log in')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleResendConfirmation = async () => {
+        if (!email) {
+            setError('Please enter your email address')
+            return
+        }
+
+        setLoading(true)
+        setError(null)
+
+        try {
+            // Use Magic Link (OTP) instead of standard resend
+            // This is often more robust as it logs the user in directly
+            const { error } = await supabase.auth.signInWithOtp({
+                email,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/auth-confirm`,
+                }
+            })
+
+            if (error) throw error
+
+            alert('We have sent a Magic Link to your email. Click it to sign in and confirm your account.')
+        } catch (err: any) {
+            setError(err.message || 'Failed to send magic link')
         } finally {
             setLoading(false)
         }
@@ -47,6 +80,22 @@ export default function LoginPage() {
                     {error && (
                         <div className="p-3 bg-red-500/20 border border-red-500/50 rounded-lg text-red-200 text-sm">
                             {error}
+                        </div>
+                    )}
+
+                    {isEmailNotConfirmed && (
+                        <div className="p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                            <p className="text-sm text-yellow-200 mb-2">
+                                Check your email inbox for a confirmation link, or click below to send a Magic Link.
+                            </p>
+                            <button
+                                type="button"
+                                onClick={handleResendConfirmation}
+                                disabled={loading}
+                                className="text-purple-400 hover:text-purple-300 font-semibold text-sm transition disabled:opacity-50"
+                            >
+                                {loading ? 'Sending...' : 'Send Magic Link to Sign In'}
+                            </button>
                         </div>
                     )}
 

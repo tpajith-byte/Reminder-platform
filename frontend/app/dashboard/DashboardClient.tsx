@@ -22,6 +22,7 @@ export default function DashboardClient({ user }: { user: User }) {
     const [showForm, setShowForm] = useState(false)
     const [formData, setFormData] = useState({
         reminder_type: '',
+        other_reminder_type: '',
         document_name: '',
         document_description: '',
         expiry_date: '',
@@ -36,7 +37,8 @@ export default function DashboardClient({ user }: { user: User }) {
         'Passport',
         'Vaccination',
         'Land Tax',
-        'Property Tax'
+        'Property Tax',
+        'Others'
     ]
 
     const router = useRouter()
@@ -75,7 +77,7 @@ export default function DashboardClient({ user }: { user: User }) {
 
             if (error) throw error
 
-            setFormData({ reminder_type: '', document_name: '', document_description: '', expiry_date: '', reminder_date: '' })
+            setFormData({ reminder_type: '', other_reminder_type: '', document_name: '', document_description: '', expiry_date: '', reminder_date: '' })
             setShowForm(false)
             fetchReminders()
         } catch (err) {
@@ -157,6 +159,19 @@ export default function DashboardClient({ user }: { user: User }) {
                                     ))}
                                 </select>
                             </div>
+                            {formData.reminder_type === 'Others' && (
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-200 mb-2">Other Reminder Type</label>
+                                    <input
+                                        type="text"
+                                        value={formData.other_reminder_type}
+                                        onChange={(e) => setFormData({ ...formData, other_reminder_type: e.target.value })}
+                                        required
+                                        className="w-full px-4 py-3 bg-white/5 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                                        placeholder="Enter reminder type..."
+                                    />
+                                </div>
+                            )}
                             <div>
                                 <label className="block text-sm font-medium text-gray-200 mb-2">Document Name</label>
                                 <input
@@ -241,7 +256,9 @@ export default function DashboardClient({ user }: { user: User }) {
                                 <div className="flex items-start justify-between mb-3">
                                     <div className="flex items-center gap-2">
                                         <FileText className="w-5 h-5 text-purple-400" />
-                                        <span className="text-xs font-semibold text-purple-300 uppercase">{reminder.reminder_type}</span>
+                                        <span className="text-xs font-semibold text-purple-300 uppercase">
+                                            {reminder.reminder_type === 'Others' ? (reminder as any).other_reminder_type : reminder.reminder_type}
+                                        </span>
                                     </div>
                                     <button
                                         onClick={() => handleDelete(reminder.id)}
