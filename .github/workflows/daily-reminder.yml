@@ -2,8 +2,8 @@ name: Daily Reminder Job
 
 on:
   schedule:
-    # Run at 8:45 PM IST (15:15 UTC)
-    - cron: '15 15 * * *'
+    # Run at 10:15 PM IST (16:45 UTC)
+    - cron: '45 16 * * *'
   workflow_dispatch:
 
 jobs:
